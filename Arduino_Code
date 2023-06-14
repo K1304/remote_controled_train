@@ -1,0 +1,112 @@
+#include <SoftwareSerial.h>
+
+SoftwareSerial BT(8, 9);
+
+int mot_1 = 2;
+int mot_2 = 3;
+int led_1 = 4;
+int r = 0;
+int i = 0;
+char value;
+bool isBluetoothConnected = false;
+
+void setup() {
+  BT.begin(9600);
+  Serial.begin(9600);
+
+  pinMode(mot_1, OUTPUT);  // Set motor inputs and LED pin as output pins
+  pinMode(mot_2, OUTPUT);
+  pinMode(led_1, OUTPUT);
+
+  digitalWrite(mot_1, LOW);  // Set initial motor state to stopped
+  digitalWrite(mot_2, LOW);
+}
+
+void loop() {
+  if (!isBluetoothConnected && BT.available()) {
+    value = BT.read();
+    Serial.write(value);
+    isBluetoothConnected = true;
+    digitalWrite(led_1, HIGH); // Turn on LED to signal Bluetooth connection
+    delay(500);
+    digitalWrite(led_1, LOW);
+  }
+
+  if (isBluetoothConnected) {
+    if (BT.available()) {
+      value = BT.read();
+      Serial.write(value);
+
+      if (value == 'A') {
+        digitalWrite(mot_1, HIGH);  // Start moving forward
+        digitalWrite(mot_2, LOW);
+      } else if (value == 'B') {
+        digitalWrite(mot_1, LOW);
+        digitalWrite(mot_2, HIGH);  // Start moving backwards
+      } else if (value == 'C') {
+        digitalWrite(mot_1, LOW);
+        digitalWrite(mot_2, LOW);
+      }
+    } else {
+      digitalWrite(mot_1, HIGH);  // Start moving forward
+      digitalWrite(mot_2, LOW);
+
+      for (int j = 0; j < 5; j++) {
+        digitalWrite(led_1, HIGH);
+        delay(100);
+        digitalWrite(led_1, LOW);
+        delay(100);
+      }
+
+      delay(1000);  // Keep moving forward for 2 seconds
+
+      for (int j = 0; j < 5; j++) {
+        digitalWrite(led_1, HIGH);
+        delay(100);
+        digitalWrite(led_1, LOW);
+        delay(100);
+      }
+
+      digitalWrite(mot_1, LOW);
+      digitalWrite(mot_2, LOW);
+
+      for (int j = 0; j < 5; j++) {
+        digitalWrite(led_1, HIGH);
+        delay(100);
+        digitalWrite(led_1, LOW);
+        delay(100);
+      }
+
+      delay(1000);
+
+      for (int j = 0; j < 5; j++) {
+        digitalWrite(led_1, HIGH);
+        delay(100);
+        digitalWrite(led_1, LOW);
+        delay(100);
+      }
+
+      digitalWrite(mot_1, LOW);   // Stops moving forward
+      digitalWrite(mot_2, HIGH);  // Start moving backwards
+
+      for (int j = 0; j < 5; j++) {
+        digitalWrite(led_1, HIGH);
+        delay(100);
+        digitalWrite(led_1, LOW);
+        delay(100);
+      }
+
+      delay(1000);
+
+      for (int j = 0; j < 5; j++) {
+        digitalWrite(led_1, HIGH);
+        delay(100);
+        digitalWrite(led_1, LOW);
+        delay(100);
+      }
+
+      digitalWrite(mot_1, LOW);   // Stop moving backwards
+      digitalWrite(mot_2, LOW);
+    }
+  }
+}
